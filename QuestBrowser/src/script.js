@@ -138,26 +138,75 @@ function handleDrawing(controller) {
     cursor.set(stylus.position.x, stylus.position.y, stylus.position.z);
 
     if (userData.isSelecting || isDrawing) {
-      socket.send("Drawing...");
       painter.lineTo(cursor);
       painter.update();
 
       const geometry = painter.mesh.geometry;
       const positions = geometry.attributes.position.array;
 
-      const filteredVertices = Array.from(positions).filter(value => Math.abs(value) > tolerance); // Ignoramos los ceros
+      const filteredVertices = Array.from(positions).filter(value => Math.abs(value) > tolerance);
 
-      // Comparamos los vértices con el estado anterior con tolerancia
       if (!lastMeshState || hasSignificantChange(filteredVertices, lastMeshState)) {
-        const currentEBX = {
-          vertices: filteredVertices,
+        // Crear un JSON que simula GLTF
+        const gltfData = {
+          asset: {
+            version: "2.0",
+            generator: "CustomPainterExporter"
+          },
+          scenes: [
+            {
+              nodes: [0]
+            }
+          ],
+          nodes: [
+            {
+              mesh: 0
+            }
+          ],
+          meshes: [
+            {
+              primitives: [
+                {
+                  attributes: {
+                    POSITION: 0
+                  }
+                }
+              ]
+            }
+          ],
+          accessors: [
+            {
+              bufferView: 0,
+              componentType: 5126, // FLOAT
+              count: filteredVertices.length / 3,
+              type: "VEC3",
+              min: [Math.min(...filteredVertices)],
+              max: [Math.max(...filteredVertices)]
+            }
+          ],
+          bufferViews: [
+            {
+              buffer: 0,
+              byteOffset: 0,
+              byteLength: filteredVertices.length * 4
+            }
+          ],
+          buffers: [
+            {
+              byteLength: filteredVertices.length * 4,
+              uri: `data:application/octet-stream;base64,${btoa(
+                  new Uint8Array(new Float32Array(filteredVertices).buffer).reduce(
+                      (data, byte) => data + String.fromCharCode(byte),
+                      ""
+                  )
+              )}`
+            }
+          ]
         };
 
-        // Serializamos el objeto EBX a JSON
-        const currentMeshState = JSON.stringify(currentEBX);
-
-        socket.send(currentMeshState); // Enviar solo el objeto filtrado en formato EBX
-        lastMeshState = filteredVertices; // Guardamos el estado actual de los vértices
+        const gltfString = JSON.stringify(gltfData);
+        socket.send(gltfString);
+        lastMeshState = filteredVertices;
       }
 
     }
@@ -166,17 +215,17 @@ function handleDrawing(controller) {
 
 function hasSignificantChange(currentVertices, lastVertices) {
   if (currentVertices.length !== lastVertices.length) {
-    return true; // Si el número de vértices cambió, es un cambio significativo
+    return true;
   }
 
-  // Comparamos vértice por vértice con tolerancia
+
   for (let i = 0; i < currentVertices.length; i++) {
     if (Math.abs(currentVertices[i] - lastVertices[i]) > tolerance) {
-      return true; // Si la diferencia es mayor que la tolerancia, es un cambio significativo
+      return true;
     }
   }
 
-  return false; // No hubo cambios significativos
+  return false;
 }
 
 function onControllerConnected(e) {
