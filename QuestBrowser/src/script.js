@@ -253,14 +253,22 @@ function handleDrawing(controller) {
 
 function updateMesh(data) {
   const loader = new GLTFLoader();
-  loader.parse(data, '', (gltf) => {
-    const newMesh = gltf.scene.children[0];
-    scene.remove(painter1.mesh);
-    painter1.mesh = newMesh;
-    scene.add(painter1.mesh);
-  });
-}
 
+  if (typeof data === 'string') {
+    loader.parse(data, '', (gltf) => {
+      const newMesh = gltf.scene.children[0];
+
+      if (painter1.mesh) {
+        scene.remove(painter1.mesh);
+      }
+      painter1.mesh = newMesh;
+      scene.add(painter1.mesh);
+    });
+  }
+  else {
+    console.error('Received data is not valid GLTF data');
+  }
+}
 function hasSignificantChange(currentVertices, lastVertices) {
   if (currentVertices.length !== lastVertices.length) {
     return true;
