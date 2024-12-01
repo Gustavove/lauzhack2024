@@ -128,6 +128,23 @@ function animate() {
 let lastMeshState = null;
 const tolerance = 0.001;
 
+function calculateMinMax(vertices) {
+  const min = [Infinity, Infinity, Infinity];
+  const max = [-Infinity, -Infinity, -Infinity];
+
+  for (let i = 0; i < vertices.length; i += 3) {
+    min[0] = Math.min(min[0], vertices[i]);
+    min[1] = Math.min(min[1], vertices[i + 1]);
+    min[2] = Math.min(min[2], vertices[i + 2]);
+
+    max[0] = Math.max(max[0], vertices[i]);
+    max[1] = Math.max(max[1], vertices[i + 1]);
+    max[2] = Math.max(max[2], vertices[i + 2]);
+  }
+
+  return { min, max };
+}
+
 function handleDrawing(controller) {
   if (!controller) return;
 
@@ -147,7 +164,8 @@ function handleDrawing(controller) {
       const filteredVertices = Array.from(positions).filter(value => Math.abs(value) > tolerance);
 
       if (!lastMeshState || hasSignificantChange(filteredVertices, lastMeshState)) {
-        // Crear un JSON que simula GLTF
+        const { min, max } = calculateMinMax(filteredVertices);
+
         const gltfData = {
           asset: {
             version: "2.0",
@@ -180,8 +198,8 @@ function handleDrawing(controller) {
               componentType: 5126, // FLOAT
               count: filteredVertices.length / 3,
               type: "VEC3",
-              min: [Math.min(...filteredVertices)],
-              max: [Math.max(...filteredVertices)]
+              min: min,
+              max: max
             }
           ],
           bufferViews: [
@@ -205,10 +223,11 @@ function handleDrawing(controller) {
         };
 
         const gltfString = JSON.stringify(gltfData);
+
         socket.send(gltfString);
+
         lastMeshState = filteredVertices;
       }
-
     }
   }
 }
