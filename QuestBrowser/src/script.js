@@ -145,17 +145,19 @@ function handleDrawing(controller) {
       const geometry = painter.mesh.geometry;
       const positions = geometry.attributes.position.array;
 
-      const currentVertices = Array.from(positions);
+      const filteredVertices = Array.from(positions).filter(value => Math.abs(value) > tolerance); // Ignoramos los ceros
 
-      if (!lastMeshState || hasSignificantChange(currentVertices, lastMeshState)) {
+      // Comparamos los vértices con el estado anterior con tolerancia
+      if (!lastMeshState || hasSignificantChange(filteredVertices, lastMeshState)) {
         const currentEBX = {
-          vertices: currentVertices,
+          vertices: filteredVertices,
         };
 
+        // Serializamos el objeto EBX a JSON
         const currentMeshState = JSON.stringify(currentEBX);
 
-        socket.send(currentMeshState);
-        lastMeshState = currentVertices;
+        socket.send(currentMeshState); // Enviar solo el objeto filtrado en formato EBX
+        lastMeshState = filteredVertices; // Guardamos el estado actual de los vértices
       }
 
     }
@@ -164,16 +166,17 @@ function handleDrawing(controller) {
 
 function hasSignificantChange(currentVertices, lastVertices) {
   if (currentVertices.length !== lastVertices.length) {
-    return true;
+    return true; // Si el número de vértices cambió, es un cambio significativo
   }
 
+  // Comparamos vértice por vértice con tolerancia
   for (let i = 0; i < currentVertices.length; i++) {
     if (Math.abs(currentVertices[i] - lastVertices[i]) > tolerance) {
-      return true;
+      return true; // Si la diferencia es mayor que la tolerancia, es un cambio significativo
     }
   }
 
-  return false;
+  return false; // No hubo cambios significativos
 }
 
 function onControllerConnected(e) {
