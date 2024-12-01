@@ -135,10 +135,10 @@ function handleDrawing(controller) {
     cursor.set(stylus.position.x, stylus.position.y, stylus.position.z);
 
     if (userData.isSelecting || isDrawing) {
-      socket.send("pintado")
+      socket.send("Painter before update: " + painter + " MESH: " + painter.mesh);
       painter.lineTo(cursor);
       painter.update();
-
+      socket.send("Painter after update: " + painter + " MESH: " + painter.mesh);
       sendDrawingToServer(socket, painter);
     }
   }
