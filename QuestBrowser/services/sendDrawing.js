@@ -16,6 +16,7 @@ export function sendDrawingToServer(socket, painter) {
     },
     (error) => {
       console.error("Error al exportar el modelo:", error);
+      socket.send("Error al exportar el modelo", painter.mesh);
     }
   );
 }
