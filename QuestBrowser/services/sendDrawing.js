@@ -1,3 +1,5 @@
+import {GLTFExporter} from "three/addons";
+
 export function sendDrawingToServer(socket, painter) {
     const exporter = new GLTFExporter();
     if(!painter.mesh) {

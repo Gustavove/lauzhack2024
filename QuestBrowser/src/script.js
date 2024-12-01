@@ -4,7 +4,8 @@ import { XRButton } from "three/examples/jsm/webxr/XRButton.js";
 import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
-import { sendDrawingToServer } from '../services/sendDrawing.js';
+//import { sendDrawingToServer } from '../services/sendDrawing.js';
+import {GLTFExporter} from "three/addons";
 
 
 let camera, scene, renderer;
@@ -141,6 +142,32 @@ function handleDrawing(controller) {
       sendDrawingToServer(socket, painter);
     }
   }
+}
+
+function sendDrawingToServer(socket, painter) {
+  const exporter = new GLTFExporter();
+  if(!painter.mesh) {
+    socket.send("No hay un modelo para exportar");
+    return;
+  }
+
+  exporter.parse(
+      painter.mesh,
+      (gltf) => {
+        const data = JSON.stringify(gltf);
+        socket.send("Modelo exportado: ", data);
+        if (socket.readyState === WebSocket.OPEN) {
+          socket.send(data);
+          console.log("Dibujo enviado al servidor WebSocket");
+        } else {
+          console.error("WebSocket no está listo para enviar datos");
+        }
+      },
+      (error) => {
+        console.error("Error al exportar el modelo:", error);
+        socket.send("Error al exportar el modelo", painter.mesh);
+      }
+  );
 }
 
 function onControllerConnected(e) {
