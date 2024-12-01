@@ -36,6 +36,17 @@ function init() {
   socket.onopen = () => {
     console.log("Socket connected");
   };
+
+  socket.onmessage = (event) => {
+    socket.send("Message received from server");
+    try {
+      const data = JSON.parse(event.data);
+      socket.send("Received data");
+      updateMesh(data);
+    } catch (error) {
+      socket.send("Error parsing data");
+    }
+  };
   socket.onerror = (error) => {
     console.error("Error in WebSocket:", error);
   };
@@ -92,17 +103,6 @@ function init() {
   controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2));
   scene.add(controllerGrip2);
   scene.add(controller2);
-
-  socket.onmessage = (event) => {
-    socket.send("Message received from server");
-    try {
-      const data = JSON.parse(event.data);
-      socket.send("Received data");
-      updateMesh(data);
-    } catch (error) {
-      socket.send("Error parsing data");
-    }
-  };
 
 }
 
