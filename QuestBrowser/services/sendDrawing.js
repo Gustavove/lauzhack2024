@@ -24,7 +24,7 @@ export function sendDrawingToServer(socket, painter) {
             scene,
             (gltf) => {
                 const data = JSON.stringify(gltf);
-
+                socket.send("Modelo exportado: " + data);
                 if (socket.readyState === WebSocket.OPEN) {
                     socket.send("Modelo exportado: " + data);
                     console.log("Dibujo exportado y enviado al servidor WebSocket");
