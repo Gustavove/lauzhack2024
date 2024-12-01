@@ -267,6 +267,7 @@ function updateMesh(data) {
       painter1.mesh = newMesh;
       socket.send("Mesh updated");
       scene.add(painter1.mesh);
+      painter1.update();
     });
   }
   else {
