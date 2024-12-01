@@ -4,7 +4,7 @@ import { XRButton } from "three/examples/jsm/webxr/XRButton.js";
 import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
-import { sendDrawingToServer } from '../services/exportDrawing.js';
+import { sendDrawingToServer } from '../services/sendDrawing.js';
 
 
 let camera, scene, renderer;
@@ -27,9 +27,9 @@ const sizes = {
   width: window.innerWidth,
   height: window.innerHeight,
 };
-
-init();
 let socket;
+init();
+
 
 function init() {
   const canvas = document.querySelector("canvas.webgl");
