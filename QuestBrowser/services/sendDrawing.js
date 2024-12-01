@@ -2,11 +2,16 @@ import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 
 export function sendDrawingToServer(socket, painter) {
   const exporter = new GLTFExporter();
+  if(!painter.mesh) {
+    socket.send("No hay un modelo para exportar");
+    return;
+  }
+
   exporter.parse(
     painter.mesh,
     (gltf) => {
       const data = JSON.stringify(gltf);
-
+      socket.send("Modelo exportado: ", data);
       if (socket.readyState === WebSocket.OPEN) {
         socket.send(data);
         console.log("Dibujo enviado al servidor WebSocket");
