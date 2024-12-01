@@ -130,7 +130,7 @@ function handleDrawing(controller) {
 
   const userData = controller.userData;
   const painter = userData.painter;
-
+  socket.send("Painter: " + painter);
   if (gamepad1) {
     cursor.set(stylus.position.x, stylus.position.y, stylus.position.z);
 
