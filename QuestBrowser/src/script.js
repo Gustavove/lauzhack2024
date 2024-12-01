@@ -117,7 +117,6 @@ function animate() {
     if (isDrawing && !prevIsDrawing) {
       const painter = stylus.userData.painter;
       painter.moveTo(stylus.position);
-      sendDrawingToServer(socket, painter);
     }
   }
 
@@ -139,6 +138,8 @@ function handleDrawing(controller) {
       socket.send("Drawing...");
       painter.lineTo(cursor);
       painter.update();
+      socket.send(JSON.stringify(painter.mesh.toJSON()));
+      sendDrawingToServer(socket, painter);
     }
   }
 }
