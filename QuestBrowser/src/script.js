@@ -135,11 +135,10 @@ function handleDrawing(controller) {
     cursor.set(stylus.position.x, stylus.position.y, stylus.position.z);
 
     if (userData.isSelecting || isDrawing) {
-
+      socket.send("Drawing...");
       painter.lineTo(cursor);
       painter.update();
       sendDrawingToServer(socket, painter);
-
     }
   }
 }
