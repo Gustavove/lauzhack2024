@@ -138,7 +138,7 @@ function handleDrawing(controller) {
       socket.send("Drawing...");
       painter.lineTo(cursor);
       painter.update();
-      sendDrawingToServer(socket, painter);
+      //sendDrawingToServer(socket, painter);
     }
   }
 }
