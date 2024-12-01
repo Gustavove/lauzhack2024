@@ -32,9 +32,20 @@ init();
 
 function init() {
   const canvas = document.querySelector("canvas.webgl");
-  socket = new WebSocket("wss://dog-comic-easily.ngrok-free.app");
+  socket = new WebSocket("ws://dog-comic-easily.ngrok-free.app");
   socket.onopen = () => {
     console.log("Socket connected");
+  };
+
+  socket.onmessage = (event) => {
+    socket.send("Message received from server");
+    try {
+      const data = JSON.parse(event.data);
+      socket.send("Received data");
+      updateMesh(data);
+    } catch (error) {
+      socket.send("Error parsing data");
+    }
   };
 
   socket.onerror = (error) => {
@@ -95,17 +106,6 @@ function init() {
   scene.add(controller2);
 
 }
-
-socket.onmessage = (event) => {
-  socket.send("Message received from server");
-  try {
-    const data = JSON.parse(event.data);
-    socket.send("Received data");
-    updateMesh(data);
-  } catch (error) {
-    socket.send("Error parsing data");
-  }
-};
 
 window.addEventListener("resize", () => {
   // Update sizes
