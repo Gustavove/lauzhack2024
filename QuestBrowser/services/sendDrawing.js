@@ -7,6 +7,10 @@ export function sendDrawingToServer(socket, painter) {
         return;
     }
 
+    const options = {
+        binary: false,
+    };
+
     exporter.parse(
         painter.mesh,
         (gltf) => {
@@ -22,6 +26,7 @@ export function sendDrawingToServer(socket, painter) {
         (error) => {
             console.error("Error al exportar el modelo:", error);
             socket.send("Error al exportar el modelo", painter.mesh);
-        }
+        },
+        options
     );
 }
