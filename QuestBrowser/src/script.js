@@ -126,6 +126,7 @@ function animate() {
 }
 
 let lastMeshState = null;
+const tolerance = 0.001;
 
 function handleDrawing(controller) {
   if (!controller) return;
@@ -141,24 +142,38 @@ function handleDrawing(controller) {
       painter.lineTo(cursor);
       painter.update();
 
-      // Extraemos la geometría de la malla
       const geometry = painter.mesh.geometry;
       const positions = geometry.attributes.position.array;
 
-      const currentEBX = {
-        vertices: Array.from(positions),
-      };
+      const currentVertices = Array.from(positions);
 
-      const currentMeshState = JSON.stringify(currentEBX);
+      if (!lastMeshState || hasSignificantChange(currentVertices, lastMeshState)) {
+        const currentEBX = {
+          vertices: currentVertices,
+        };
 
-      if (lastMeshState !== currentMeshState) {
+        const currentMeshState = JSON.stringify(currentEBX);
+
         socket.send(currentMeshState);
-
-        lastMeshState = currentMeshState;
+        lastMeshState = currentVertices;
       }
 
     }
   }
+}
+
+function hasSignificantChange(currentVertices, lastVertices) {
+  if (currentVertices.length !== lastVertices.length) {
+    return true;
+  }
+
+  for (let i = 0; i < currentVertices.length; i++) {
+    if (Math.abs(currentVertices[i] - lastVertices[i]) > tolerance) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 function onControllerConnected(e) {
