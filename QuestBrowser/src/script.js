@@ -130,15 +130,15 @@ function handleDrawing(controller) {
 
   const userData = controller.userData;
   const painter = userData.painter;
-  socket.send("Painter: " + painter);
+
   if (gamepad1) {
     cursor.set(stylus.position.x, stylus.position.y, stylus.position.z);
 
     if (userData.isSelecting || isDrawing) {
-      socket.send("Painter before update: " + painter + " MESH: " + painter.mesh.name);
+
       painter.lineTo(cursor);
       painter.update();
-      socket.send("Painter after update: " + painter + " MESH: " + painter.mesh.name);
+
       sendDrawingToServer(socket, painter);
     }
   }

@@ -1,14 +1,15 @@
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
-
+import * as THREE from "three";
 export function sendDrawingToServer(socket, painter) {
   const exporter = new GLTFExporter();
   if(!painter.mesh) {
     socket.send("No hay un modelo para exportar");
     return;
   }
-
+  const scene = new THREE.Scene();
+  scene.add(painter.mesh);
   exporter.parse(
-    painter.mesh,
+    scene,
     (gltf) => {
       const data = JSON.stringify(gltf);
       socket.send("Modelo exportado: ", data);
