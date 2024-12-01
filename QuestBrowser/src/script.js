@@ -37,10 +37,11 @@ function init() {
     console.log("Socket connected");
   };
   socket.onerror = (error) => {
-    console.error("Error en WebSocket:", error);
+    console.error("Error in WebSocket:", error);
   };
   socket.onmessage = (event) => {
     const data = JSON.parse(event.data);
+    socket.send("Received data");
     updateMesh(data);
   };
 
@@ -262,6 +263,7 @@ function updateMesh(data) {
         scene.remove(painter1.mesh);
       }
       painter1.mesh = newMesh;
+      socket.send("Mesh updated");
       scene.add(painter1.mesh);
     });
   }
