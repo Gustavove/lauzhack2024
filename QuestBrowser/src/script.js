@@ -94,9 +94,15 @@ function init() {
   scene.add(controller2);
 
   socket.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    socket.send("Received data");
-    updateMesh(data);
+    console.log("Message received from server");
+    try {
+      const data = JSON.parse(event.data);
+      console.log("Data parsed successfully:", data);
+      socket.send("Received data");
+      updateMesh(data);
+    } catch (error) {
+      console.error("Error parsing data:", error);
+    }
   };
 
 }
