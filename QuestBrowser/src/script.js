@@ -32,7 +32,7 @@ init();
 
 function init() {
   const canvas = document.querySelector("canvas.webgl");
-  socket = new WebSocket("ws://dog-comic-easily.ngrok-free.app");
+  socket = new WebSocket("wss://dog-comic-easily.ngrok-free.app");
   socket.onopen = () => {
     console.log("Socket connected");
   };
