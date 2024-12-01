@@ -39,6 +39,11 @@ function init() {
   socket.onerror = (error) => {
     console.error("Error en WebSocket:", error);
   };
+  socket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    updateMesh(data);
+  };
+
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x222222);
   camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.01, 50);
@@ -244,6 +249,16 @@ function handleDrawing(controller) {
       }
     }
   }
+}
+
+function updateMesh(data) {
+  const loader = new GLTFLoader();
+  loader.parse(data, '', (gltf) => {
+    const newMesh = gltf.scene.children[0];
+    scene.remove(painter1.mesh);
+    painter1.mesh = newMesh;
+    scene.add(painter1.mesh);
+  });
 }
 
 function hasSignificantChange(currentVertices, lastVertices) {
