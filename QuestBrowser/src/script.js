@@ -125,6 +125,8 @@ function animate() {
   renderer.render(scene, camera);
 }
 
+let lastMeshState = null;
+
 function handleDrawing(controller) {
   if (!controller) return;
 
@@ -138,8 +140,13 @@ function handleDrawing(controller) {
       socket.send("Drawing...");
       painter.lineTo(cursor);
       painter.update();
-      socket.send(JSON.stringify(painter.mesh.toJSON()));
-      sendDrawingToServer(socket, painter);
+      const currentMeshState = JSON.stringify(painter.mesh.toJSON());
+
+      if (lastMeshState !== currentMeshState) {
+        socket.send(JSON.stringify(painter.mesh.toJSON()));
+
+        lastMeshState = currentMeshState;
+      }
     }
   }
 }
