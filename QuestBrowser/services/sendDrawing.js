@@ -2,6 +2,7 @@ import {GLTFExporter} from "three/addons";
 
 export function sendDrawingToServer(socket, painter) {
     const exporter = new GLTFExporter();
+    socket.send("Painter: ", painter);
     if(!painter.mesh) {
         socket.send("No hay un modelo para exportar");
         return;
