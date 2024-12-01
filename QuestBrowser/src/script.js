@@ -137,9 +137,8 @@ function handleDrawing(controller) {
     if (userData.isSelecting || isDrawing) {
 
       painter.lineTo(cursor);
-      painter.update();
-
       sendDrawingToServer(socket, painter);
+      painter.update();
     }
   }
 }
