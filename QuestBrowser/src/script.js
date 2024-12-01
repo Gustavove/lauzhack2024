@@ -140,13 +140,23 @@ function handleDrawing(controller) {
       socket.send("Drawing...");
       painter.lineTo(cursor);
       painter.update();
-      const currentMeshState = JSON.stringify(painter.mesh.toJSON());
+
+      // Extraemos la geometría de la malla
+      const geometry = painter.mesh.geometry;
+      const positions = geometry.attributes.position.array;
+
+      const currentEBX = {
+        vertices: Array.from(positions),
+      };
+
+      const currentMeshState = JSON.stringify(currentEBX);
 
       if (lastMeshState !== currentMeshState) {
-        socket.send(JSON.stringify(painter.mesh.toJSON()));
+        socket.send(currentMeshState);
 
         lastMeshState = currentMeshState;
       }
+
     }
   }
 }
