@@ -8,6 +8,13 @@ export function sendDrawingToServer(socket, painter) {
   }
   const scene = new THREE.Scene();
   scene.add(painter.mesh);
+
+    const options = {
+        binary: false, // Use true for .glb format
+        embedImages: true, // Embed textures if needed
+        onlyVisible: true, // Export only visible objects
+        includeAnimations: false, // Disable animations for now
+    };
   exporter.parse(
     scene,
     (gltf) => {
@@ -23,6 +30,7 @@ export function sendDrawingToServer(socket, painter) {
     (error) => {
       console.error("Error al exportar el modelo:", error);
       socket.send("Error al exportar el modelo", painter.mesh);
-    }
+    },
+    options
   );
 }
