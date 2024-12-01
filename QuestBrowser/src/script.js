@@ -37,16 +37,6 @@ function init() {
     console.log("Socket connected");
   };
 
-  socket.onmessage = (event) => {
-    socket.send("Message received from server");
-    try {
-      const data = JSON.parse(event.data);
-      socket.send("Received data");
-      updateMesh(data);
-    } catch (error) {
-      socket.send("Error parsing data");
-    }
-  };
   socket.onerror = (error) => {
     console.error("Error in WebSocket:", error);
   };
@@ -105,6 +95,17 @@ function init() {
   scene.add(controller2);
 
 }
+
+socket.onmessage = (event) => {
+  socket.send("Message received from server");
+  try {
+    const data = JSON.parse(event.data);
+    socket.send("Received data");
+    updateMesh(data);
+  } catch (error) {
+    socket.send("Error parsing data");
+  }
+};
 
 window.addEventListener("resize", () => {
   // Update sizes
