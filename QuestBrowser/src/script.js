@@ -1,10 +1,9 @@
 import * as THREE from "three";
-import { TubePainter } from "three/examples/jsm/misc/TubePainter.js";
-import { XRButton } from "three/examples/jsm/webxr/XRButton.js";
-import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory.js";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
-import { sendDrawingToServer } from '../services/sendDrawing.js';
+import {TubePainter} from "three/examples/jsm/misc/TubePainter.js";
+import {XRButton} from "three/examples/jsm/webxr/XRButton.js";
+import {XRControllerModelFactory} from "three/examples/jsm/webxr/XRControllerModelFactory.js";
+import {GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader.js";
+import {DRACOLoader} from "three/examples/jsm/loaders/DRACOLoader.js";
 
 
 let camera, scene, renderer;
@@ -145,6 +144,19 @@ function calculateMinMax(vertices) {
   return { min, max };
 }
 
+function centerVertices(vertices, min, max) {
+  const centerX = (min[0] + max[0]) / 2;
+  const centerY = (min[1] + max[1]) / 2;
+  const centerZ = (min[2] + max[2]) / 2;
+
+  return vertices.map((v, index) => {
+    if (index % 3 === 0) return v - centerX;     // X
+    if (index % 3 === 1) return v - centerY;     // Y
+    if (index % 3 === 2) return v - centerZ;     // Z
+    return v;
+  });
+}
+
 function handleDrawing(controller) {
   if (!controller) return;
 
@@ -165,6 +177,8 @@ function handleDrawing(controller) {
 
       if (!lastMeshState || hasSignificantChange(filteredVertices, lastMeshState)) {
         const { min, max } = calculateMinMax(filteredVertices);
+
+        const centeredVertices = centerVertices(filteredVertices, min, max);
 
         const gltfData = {
           asset: {
@@ -196,7 +210,7 @@ function handleDrawing(controller) {
             {
               bufferView: 0,
               componentType: 5126, // FLOAT
-              count: filteredVertices.length / 3,
+              count: centeredVertices.length / 3,
               type: "VEC3",
               min: min,
               max: max
@@ -206,14 +220,14 @@ function handleDrawing(controller) {
             {
               buffer: 0,
               byteOffset: 0,
-              byteLength: filteredVertices.length * 4
+              byteLength: centeredVertices.length * 4
             }
           ],
           buffers: [
             {
-              byteLength: filteredVertices.length * 4,
+              byteLength: centeredVertices.length * 4,
               uri: `data:application/octet-stream;base64,${btoa(
-                  new Uint8Array(new Float32Array(filteredVertices).buffer).reduce(
+                  new Uint8Array(new Float32Array(centeredVertices).buffer).reduce(
                       (data, byte) => data + String.fromCharCode(byte),
                       ""
                   )
@@ -226,7 +240,7 @@ function handleDrawing(controller) {
 
         socket.send(gltfString);
 
-        lastMeshState = filteredVertices;
+        lastMeshState = centeredVertices;
       }
     }
   }
@@ -236,7 +250,6 @@ function hasSignificantChange(currentVertices, lastVertices) {
   if (currentVertices.length !== lastVertices.length) {
     return true;
   }
-
 
   for (let i = 0; i < currentVertices.length; i++) {
     if (Math.abs(currentVertices[i] - lastVertices[i]) > tolerance) {
