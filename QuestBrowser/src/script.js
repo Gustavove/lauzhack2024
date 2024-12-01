@@ -4,6 +4,8 @@ import { XRButton } from "three/examples/jsm/webxr/XRButton.js";
 import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
+import { sendDrawingToServer } from '../services/exportDrawing.js';
+
 
 let camera, scene, renderer;
 let controller1, controller2;
@@ -27,9 +29,17 @@ const sizes = {
 };
 
 init();
+let socket;
 
 function init() {
   const canvas = document.querySelector("canvas.webgl");
+  socket = new WebSocket("wss://dog-comic-easily.ngrok-free.app");
+  socket.onopen = () => {
+    console.log("Socket connected");
+  };
+  socket.onerror = (error) => {
+    console.error("Error en WebSocket:", error);
+  };
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x222222);
   camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.01, 50);
@@ -112,7 +122,6 @@ function animate() {
 
   handleDrawing(stylus);
 
-  // Render
   renderer.render(scene, camera);
 }
 
@@ -128,6 +137,8 @@ function handleDrawing(controller) {
     if (userData.isSelecting || isDrawing) {
       painter.lineTo(cursor);
       painter.update();
+
+      sendDrawingToServer(socket, painter);
     }
   }
 }
