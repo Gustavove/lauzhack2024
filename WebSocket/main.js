@@ -1,21 +1,25 @@
 const WebSocket = require('ws');
+const { v4: uuidv4 } = require('uuid');
 
 const wss = new WebSocket.Server({ port: 3001 });
 
 let connectedClients = {};
 
 wss.on('connection', (ws, req) => {
-    const clientId = req.connection.remoteAddress;
-
+    const clientId = uuidv4();
     connectedClients[clientId] = ws;
-    console.log(`New client with id: ${clientId}`);
+    console.log(`New client connected with id: ${clientId}`);
 
     ws.on('message', (message) => {
-        console.log(`Message ${clientId}: ${message}`);
+        console.log(`Message from ${clientId}: ${message}`);
 
         for (let id in connectedClients) {
             if (id !== clientId) {
-                connectedClients[id].send(message);
+                try {
+                    connectedClients[id].send(message);
+                } catch (error) {
+                    console.error(`Error sending message to client ${id}: ${error}`);
+                }
             }
         }
     });
