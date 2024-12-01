@@ -39,11 +39,6 @@ function init() {
   socket.onerror = (error) => {
     console.error("Error in WebSocket:", error);
   };
-  socket.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    socket.send("Received data");
-    updateMesh(data);
-  };
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x222222);
@@ -97,6 +92,13 @@ function init() {
   controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2));
   scene.add(controllerGrip2);
   scene.add(controller2);
+
+  socket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    socket.send("Received data");
+    updateMesh(data);
+  };
+
 }
 
 window.addEventListener("resize", () => {
